@@ -1,65 +1,130 @@
-import Image from "next/image";
+
+
+'use client';
+
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export default function Home() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // 🎯 AXIOS - SIMPLE & CLEAN
+        const response = await axios.get('https://dummyjson.com/products?limit=6');
+        
+        // ✅ Axios automatically handles JSON conversion
+console.log('API Response:', response.data); // ← Add this
+        
+      } catch (err) {
+        setError(err.message);
+        console.error('API Error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div>
+      {/* Header */}
+      <header style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
+        <h1>🛍️ ShopEasy</h1>
+        <nav>
+          <a href="/" style={{ marginRight: '15px' }}>Home</a>
+          <a href="/products" style={{ marginRight: '15px' }}>Products</a>
+          <a href="/cart">Cart (0)</a>
+        </nav>
+      </header>
+
+      {/* Hero Section */}
+      <main style={{ padding: '40px 20px', textAlign: 'center' }}>
+        <h2>Welcome to ShopEasy</h2>
+        <p>Your one-stop shop for amazing products</p>
+        
+        {/* 🎯 FEATURED PRODUCTS FROM API */}
+        <section style={{ marginTop: '50px' }}>
+          <h3>Featured Products</h3>
+          
+          {loading && <p>🔄 Loading products...</p>}
+          {error && <p style={{ color: 'red' }}>❌ Error: {error}</p>}
+          
+          {!loading && !error && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '20px',
+              maxWidth: '1000px',
+              margin: '30px auto'
+            }}>
+              {products.map(product => (
+                <div key={product.id} style={{
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                  padding: '15px',
+                  textAlign: 'center'
+                }}>
+                  <img 
+                    src={product.thumbnail} 
+                    alt={product.title}
+                    style={{
+                      width: '100%',
+                      height: '150px',
+                      objectFit: 'cover',
+                      borderRadius: '4px'
+                    }}
+                  />
+                  <h4 style={{ margin: '10px 0' }}>{product.title}</h4>
+                  <p style={{ 
+                    fontSize: '1.1rem', 
+                    fontWeight: 'bold',
+                    color: '#0070f3'
+                  }}>
+                    ${product.price}
+                  </p>
+                  <button style={{
+                    padding: '8px 16px',
+                    background: '#0070f3',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}>
+                    View Details
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <button style={{ 
+          padding: '10px 20px', 
+          background: '#0070f3', 
+          color: 'white', 
+          border: 'none', 
+          borderRadius: '5px',
+          marginTop: '20px'
+        }}>
+          Browse All Products
+        </button>
       </main>
+
+      {/* Footer */}
+      <footer style={{ 
+        padding: '20px', 
+        textAlign: 'center', 
+        borderTop: '1px solid #eee',
+        marginTop: '40px'
+      }}>
+        <p>© 2024 ShopEasy. Built with Next.js</p>
+      </footer>
     </div>
   );
 }
