@@ -1,28 +1,46 @@
-
-
+// pages/index.tsx (Enhanced)
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
+// Define TypeScript interfaces
+interface Product {
+  id: number;
+  title: string;
+  price: number;
+  description: string;
+  thumbnail: string;
+  rating: number;
+  brand: string;
+  category: string;
+  images: string[];
+}
+
+interface ProductsResponse {
+  products: Product[];
+  total: number;
+  skip: number;
+  limit: number;
+}
+
 export default function Home() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        // 🎯 AXIOS - SIMPLE & CLEAN
-        const response = await axios.get('https://dummyjson.com/products?limit=6');
-        
-        // ✅ Axios automatically handles JSON conversion
-console.log('API Response:', response.data); // ← Add this
-        
+        const response = await axios.get<ProductsResponse>(
+          'https://dummyjson.com/products?limit=6'
+        );
+        setProducts(response.data.products);
       } catch (err) {
-        setError(err.message);
-        console.error('API Error:', err);
+        setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
       }
@@ -31,99 +49,227 @@ console.log('API Response:', response.data); // ← Add this
     fetchProducts();
   }, []);
 
+  const handleProductClick = (productId: number) => {
+    router.push(`/products/${productId}`);
+  };
+
+  const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('Added to cart:', product.title);
+    // TODO: Implement cart state management
+  };
+
   return (
-    <div>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
       {/* Header */}
-      <header style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
-        <h1>🛍️ ShopEasy</h1>
-        <nav>
-          <a href="/" style={{ marginRight: '15px' }}>Home</a>
-          <a href="/products" style={{ marginRight: '15px' }}>Products</a>
-          <a href="/cart">Cart (0)</a>
-        </nav>
+      <header style={{ 
+        padding: '20px', 
+        borderBottom: '1px solid #e9ecef',
+        backgroundColor: 'white',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1 style={{ margin: 0, color: '#0070f3' }}>🛍️ ShopEasy</h1>
+          <nav>
+            <a href="/" style={{ marginRight: '20px', textDecoration: 'none', color: '#495057' }}>Home</a>
+            <a href="/products" style={{ marginRight: '20px', textDecoration: 'none', color: '#495057' }}>Products</a>
+            <a href="/cart" style={{ textDecoration: 'none', color: '#495057' }}>Cart (0)</a>
+          </nav>
+        </div>
       </header>
 
       {/* Hero Section */}
       <main style={{ padding: '40px 20px', textAlign: 'center' }}>
-        <h2>Welcome to ShopEasy</h2>
-        <p>Your one-stop shop for amazing products</p>
-        
-        {/* 🎯 FEATURED PRODUCTS FROM API */}
-        <section style={{ marginTop: '50px' }}>
-          <h3>Featured Products</h3>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#212529' }}>Welcome to ShopEasy</h2>
+          <p style={{ fontSize: '1.2rem', color: '#6c757d', marginBottom: '2rem' }}>
+            Your one-stop shop for amazing products
+          </p>
           
-          {loading && <p>🔄 Loading products...</p>}
-          {error && <p style={{ color: 'red' }}>❌ Error: {error}</p>}
-          
-          {!loading && !error && (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-              gap: '20px',
-              maxWidth: '1000px',
-              margin: '30px auto'
-            }}>
-              {products.map(product => (
-                <div key={product.id} style={{
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  padding: '15px',
-                  textAlign: 'center'
-                }}>
-                  <img 
-                    src={product.thumbnail} 
-                    alt={product.title}
-                    style={{
-                      width: '100%',
-                      height: '150px',
-                      objectFit: 'cover',
-                      borderRadius: '4px'
-                    }}
-                  />
-                  <h4 style={{ margin: '10px 0' }}>{product.title}</h4>
-                  <p style={{ 
-                    fontSize: '1.1rem', 
-                    fontWeight: 'bold',
-                    color: '#0070f3'
-                  }}>
-                    ${product.price}
-                  </p>
-                  <button style={{
-                    padding: '8px 16px',
-                    background: '#0070f3',
+          {/* Featured Products Section */}
+          <section style={{ marginTop: '50px' }}>
+            <h3 style={{ fontSize: '2rem', marginBottom: '2rem', color: '#343a40' }}>Featured Products</h3>
+            
+            {loading && (
+              <div style={{ padding: '40px' }}>
+                <p style={{ fontSize: '1.1rem', color: '#6c757d' }}>🔄 Loading products...</p>
+              </div>
+            )}
+            
+            {error && (
+              <div style={{ padding: '40px', color: '#dc3545' }}>
+                <p>❌ Error: {error}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  style={{
+                    padding: '10px 20px',
+                    background: '#dc3545',
                     color: 'white',
                     border: 'none',
-                    borderRadius: '4px',
+                    borderRadius: '5px',
                     cursor: 'pointer'
-                  }}>
-                    View Details
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                  }}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+            
+            {!loading && !error && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '30px',
+                margin: '40px auto'
+              }}>
+                {products.map(product => (
+                  <div 
+                    key={product.id}
+                    style={{
+                      border: '1px solid #dee2e6',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      backgroundColor: 'white',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                    onClick={() => handleProductClick(product.id)}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-8px)';
+                      e.currentTarget.style.boxShadow = '0 12px 25px rgba(0,0,0,0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                    }}
+                  >
+                    {/* Product Image */}
+                    <div style={{ 
+                      width: '100%', 
+                      height: '200px', 
+                      overflow: 'hidden',
+                      borderRadius: '8px',
+                      marginBottom: '15px'
+                    }}>
+                      <img 
+                        src={product.thumbnail} 
+                        alt={product.title}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          transition: 'transform 0.3s ease'
+                        }}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23f8f9fa'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='14' fill='%236c757d'%3ENo Image%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                    </div>
+                    
+                    {/* Product Info */}
+                    <h4 style={{ 
+                      margin: '10px 0', 
+                      fontSize: '1.2rem',
+                      color: '#212529',
+                      fontWeight: '600'
+                    }}>
+                      {product.title}
+                    </h4>
+                    
+                    <p style={{ 
+                      fontSize: '1.3rem', 
+                      fontWeight: 'bold',
+                      color: '#0070f3',
+                      margin: '10px 0'
+                    }}>
+                      ${product.price}
+                    </p>
+                    
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'center', 
+                      alignItems: 'center',
+                      gap: '15px',
+                      margin: '15px 0',
+                      fontSize: '0.9rem',
+                      color: '#6c757d'
+                    }}>
+                      <span>⭐ {product.rating}/5</span>
+                      <span>🏷️ {product.brand}</span>
+                    </div>
+                    
+                    <button 
+                      style={{
+                        padding: '12px 24px',
+                        background: '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        fontSize: '1rem',
+                        transition: 'background-color 0.2s ease',
+                        width: '100%'
+                      }}
+                      onClick={(e) => handleAddToCart(product, e)}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#218838';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#28a745';
+                      }}
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
 
-        <button style={{ 
-          padding: '10px 20px', 
-          background: '#0070f3', 
-          color: 'white', 
-          border: 'none', 
-          borderRadius: '5px',
-          marginTop: '20px'
-        }}>
-          Browse All Products
-        </button>
+          {/* Browse All Button */}
+          <button 
+            style={{ 
+              padding: '15px 30px', 
+              background: '#0070f3', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '8px',
+              marginTop: '30px',
+              cursor: 'pointer',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              transition: 'background-color 0.2s ease'
+            }}
+            onClick={() => router.push('/products')}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#0056b3';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#0070f3';
+            }}
+          >
+            Browse All Products
+          </button>
+        </div>
       </main>
 
       {/* Footer */}
       <footer style={{ 
-        padding: '20px', 
+        padding: '30px 20px', 
         textAlign: 'center', 
-        borderTop: '1px solid #eee',
-        marginTop: '40px'
+        borderTop: '1px solid #e9ecef',
+        marginTop: '60px',
+        backgroundColor: 'white',
+        color: '#6c757d'
       }}>
-        <p>© 2024 ShopEasy. Built with Next.js</p>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <p>© 2024 ShopEasy. Built with Next.js & TypeScript</p>
+        </div>
       </footer>
     </div>
   );
