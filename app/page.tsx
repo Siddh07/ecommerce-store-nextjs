@@ -4,8 +4,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import {useCart} from '../app/CartContext';
 
-// Define TypeScript interfaces
+// Define  interfaces
 interface Product {
   id: number;
   title: string;
@@ -30,6 +31,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const {addToCart, cart} = useCart();
+
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -55,8 +58,8 @@ export default function Home() {
 
   const handleAddToCart = (product: Product, e: React.MouseEvent) => {
     e.stopPropagation();
+    addToCart(product);
     console.log('Added to cart:', product.title);
-    // TODO: Implement cart state management
   };
 
   return (
@@ -73,7 +76,7 @@ export default function Home() {
           <nav>
             <a href="/" style={{ marginRight: '20px', textDecoration: 'none', color: '#495057' }}>Home</a>
             <a href="/products" style={{ marginRight: '20px', textDecoration: 'none', color: '#495057' }}>Products</a>
-            <a href="/cart" style={{ textDecoration: 'none', color: '#495057' }}>Cart (0)</a>
+            <a href="/cart" style={{ textDecoration: 'none', color: '#495057' }}>Cart ({cart.totals.totalItems})</a>
           </nav>
         </div>
       </header>
