@@ -5,6 +5,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import {useCart} from '../app/CartContext';
+import CartPage from './cart/page';
+import Link from 'next/link';
+
 
 // Define  interfaces
 interface Product {
@@ -74,10 +77,11 @@ export default function Home() {
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h1 style={{ margin: 0, color: '#0070f3' }}>🛍️ ShopEasy</h1>
           <nav>
-            <a href="/" style={{ marginRight: '20px', textDecoration: 'none', color: '#495057' }}>Home</a>
-            <a href="/products" style={{ marginRight: '20px', textDecoration: 'none', color: '#495057' }}>Products</a>
-            <a href="/cart" style={{ textDecoration: 'none', color: '#495057' }}>Cart ({cart.totals.totalItems})</a>
-          </nav>
+            <Link  href="/" style={{ marginRight: '20px', textDecoration: 'none', color: '#495057' }}>Home</Link>
+            <Link  href="/products" style={{ marginRight: '20px', textDecoration: 'none', color: '#495057' }}>Products</Link>
+<Link href="/cart" style={{ textDecoration: 'none', color: '#495057', fontWeight: 'bold' }}>
+        🛒 Cart ({cart.totals.totalItems})
+      </Link>          </nav>
         </div>
       </header>
 

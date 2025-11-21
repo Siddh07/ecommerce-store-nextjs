@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Define the Product interface (what comes from API)
-interface Product {
+export interface Product {
     id: number;
     title: string;
     price: number;
@@ -16,17 +16,17 @@ interface Product {
 }
 
 // CartItem contains Product + quantity
-interface CartItem {
+ export interface CartItem {
     product: Product;
     quantity: number;
 }
 
-interface CartTotals {
+export interface CartTotals {
     totalItems: number;
     totalPrice: number;
 }
 
-interface CartState {
+export interface CartState {
     items: CartItem[];
     totals: CartTotals;
 }
