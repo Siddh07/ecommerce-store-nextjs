@@ -2,6 +2,8 @@
 
 import React from "react";
 import { useCart } from "@/app/CartContext"; // Make sure this path is correct!
+import Link from "next/link";
+
 
 export default function CartPage() {
   const { cart, removeFromCart } = useCart();
@@ -46,6 +48,11 @@ export default function CartPage() {
           Total Price: ${cart.totals.totalPrice.toFixed(2)}
         </p>
       </div>
+<Link href="/checkout" >  
+ <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" >
+        Proceed to Checkout
+      </button>
+      </Link>  
     </div>
   );
 }
