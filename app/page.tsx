@@ -50,7 +50,7 @@ export default function Home() {
         // We fetch everything upfront so the Search Bar can search the ENTIRE store instantly,
         // not just the 3 items visible on the screen.
         const response = await axios.get<ProductsResponse>(
-          "https://dummyjson.com/products?limit=100"
+          "/api/products?limit=100"
         );
         setProducts(response.data.products);
       } catch (err) {

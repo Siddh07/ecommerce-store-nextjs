@@ -1,30 +1,36 @@
-// app/products/[id]/page.tsx (Debug Version)
 import Link from 'next/link';
+import AddToCartButton from '@/app/AddToCartButton';// ✅ 1. DEFINE THE TYPE
+interface Product {
+  id: number;
+  title: string;
+  price: number;
+  description: string;
+  thumbnail: string;
+  rating: number;
+  brand: string;
+  category: string;
+}
 
-export default async function ProductPage({ params }: PageProps) {
+// ✅ 2. CORRECT PROPS TYPE (Next.js 15/16 style)
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
-  console.log('🔄 Fetching product with ID:', id); // Debug log
-  
   try {
-    const apiUrl = `https://dummyjson.com/products/${id}`;
-    console.log('📡 API URL:', apiUrl); // Debug log
+    // Determine base URL
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const apiUrl = `${baseUrl}/api/products/${id}`;
     
+    console.log('📡 Fetching from:', apiUrl);
+
     const response = await fetch(apiUrl, {
-      next: { revalidate: 60 }
+      cache: 'no-store' // Ensure fresh data
     });
-    
-    console.log('📊 Response status:', response.status); // Debug log
-    console.log('📊 Response ok:', response.ok); // Debug log
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const productData = await response.json();
-    console.log('✅ Product data received:', productData); // Debug log
-    
-    const product: Product = productData;
+    const product: Product = await response.json();
     
     return (
       <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
@@ -32,7 +38,7 @@ export default async function ProductPage({ params }: PageProps) {
           <h1>🛍️ ShopEasy</h1>
           <nav>
             <Link href="/" style={{ marginRight: '15px', textDecoration: 'none', color: '#0070f3' }}>Home</Link>
-            <Link href="/products" style={{ textDecoration: 'none', color: '#0070f3' }}>Products</Link>
+            <Link href="/cart" style={{ textDecoration: 'none', color: '#0070f3', fontWeight: 'bold' }}>Cart</Link>
           </nav>
         </header>
         
@@ -41,39 +47,29 @@ export default async function ProductPage({ params }: PageProps) {
           <img 
             src={product.thumbnail} 
             alt={product.title} 
-            style={{ width: '300px', height: '300px', objectFit: 'cover' }}
+            style={{ width: '300px', height: '300px', objectFit: 'cover', borderRadius: '8px' }}
           />
-          <p>{product.description}</p>
-          <p><strong>Price: ${product.price}</strong></p>
+          <p style={{ fontSize: '1.2rem', color: '#555' }}>{product.description}</p>
+          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0070f3' }}>Price: ${product.price}</p>
           <p>Rating: {product.rating}/5 ⭐</p>
           <p>Brand: {product.brand}</p>
           <p>Category: {product.category}</p>
+
+          {/* ✅ 3. ADD THE BUTTON BACK */}
+          <div style={{ marginTop: '20px' }}>
+            <AddToCartButton product={product} />
+          </div>
         </main>
       </div>
     );
   } catch (error) {
-    console.error('❌ Error fetching product:', error); // Debug log
+    console.error('❌ Error fetching product:', error);
     
     return (
-      <div style={{ padding: '20px' }}>
-        <header style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
-          <h1>🛍️ ShopEasy</h1>
-          <nav>
-            <Link href="/" style={{ marginRight: '15px', textDecoration: 'none', color: '#0070f3' }}>Home</Link>
-            <Link href="/products" style={{ textDecoration: 'none', color: '#0070f3' }}>Products</Link>
-          </nav>
-        </header>
-        
-        <main style={{ padding: '40px 20px', textAlign: 'center' }}>
-          <h1>Product Not Found</h1>
-          <p>Sorry, we couldn't find product {id}</p>
-          <p style={{ color: 'red', fontSize: '0.9rem' }}>
-            Error: {error instanceof Error ? error.message : 'Unknown error'}
-          </p>
-          <Link href="/products" style={{ color: '#0070f3', textDecoration: 'none' }}>
-            ← Back to Products
-          </Link>
-        </main>
+      <div style={{ padding: '50px', textAlign: 'center' }}>
+        <h1>Product Not Found</h1>
+        <p>Could not load product ID: {id}</p>
+        <Link href="/" style={{ color: 'blue', textDecoration: 'underline' }}>← Back to Products</Link>
       </div>
     );
   }
