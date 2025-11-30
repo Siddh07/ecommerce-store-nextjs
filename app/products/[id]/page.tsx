@@ -1,15 +1,6 @@
 import Link from 'next/link';
 import AddToCartButton from '@/app/AddToCartButton';// ✅ 1. DEFINE THE TYPE
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-  description: string;
-  thumbnail: string;
-  rating: number;
-  brand: string;
-  category: string;
-}
+import { Product } from '@/app/CartContext';
 
 // ✅ 2. CORRECT PROPS TYPE (Next.js 15/16 style)
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {

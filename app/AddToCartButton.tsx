@@ -1,16 +1,8 @@
 'use client'; // This makes the button interactive
 
-import { useCart } from '../app/CartContext'; // Adjust path if needed
+import { useCart, Product } from '../app/CartContext';
 import { useState } from 'react';
 
-// We need to define what a Product is again, or import the interface
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-  thumbnail: string;
-  // ... other fields optional for the cart
-}
 
 export default function AddToCartButton({ product }: { product: Product }) {
   const { addToCart } = useCart();
