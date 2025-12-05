@@ -23,3 +23,26 @@ export async function GET(
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+
+                                                                                    
+//  The Delete Logic
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const productId = parseInt(id);
+
+    // 1. Tell Prisma to delete
+    await prisma.product.delete({
+      where: { id: productId },
+    });
+
+    // 2. Respond with Success
+    return NextResponse.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    return NextResponse.json({ error: 'Error deleting product' }, { status: 500 });
+  }
+}
